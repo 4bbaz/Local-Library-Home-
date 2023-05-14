@@ -12,7 +12,7 @@ var catalogRouter = require('./routes/catalog');
 
 var app = express();
 
-
+app.use(express.json());
 // set up mongoDB
 const mongoose = require('mongoose');
 const { mainModule } = require('process');

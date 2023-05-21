@@ -43,7 +43,7 @@ app.use(limiter);
 // set up mongoDB
 const mongoose = require('mongoose');
 
-const mongoDB = process.env.MONGODB_URI;
+const mongoDB = process.env.MONGO_URL;
 async function main() {
   await mongoose.connect(mongoDB);
 }

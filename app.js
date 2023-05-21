@@ -9,16 +9,43 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var catalogRouter = require('./routes/catalog');
 
+const compression = require("compression");
+const helmet = require("helmet");
+
+
+
 
 var app = express();
 
+
+app.use(compression());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  })
+);
+
+const RateLimit = require("express-rate-limit");
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20,
+});
+// Apply rate limiter to all requests
+app.use(limiter);
+
+
+
 // set up mongoDB
 const mongoose = require('mongoose');
-const { mainModule } = require('process');
 
+const mongoDB = process.env.MONGODB_URI;
 async function main() {
-  await mongoose.connect(process.env.MongoDB);
+  await mongoose.connect(mongoDB);
 }
 
 main().catch((err) => { console.log(err); });
@@ -33,9 +60,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/catalog', catalogRouter)
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/catalog', catalogRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
